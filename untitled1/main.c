@@ -2,48 +2,53 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct Student {
-    char name[50];
-    char class[20];
-    char dob[15];
+typedef struct {
+    char ten[50];
+    char lop[10];
+    char ngaySinh[15];
     float gpa;
-};
+} SinhVien;
 
-int compare(const void *a, const void *b) {return (*(struct Student*)b).gpa - (*(struct Student*)a).gpa;}
+int compare(const void *a, const void *b) {
+    SinhVien *sv1 = (SinhVien *)a;
+    SinhVien *sv2 = (SinhVien *)b;
+    if (sv1->gpa < sv2->gpa) return 1;
+    if (sv1->gpa > sv2->gpa) return -1;
+    return 0;
+}
 
 int main() {
-    FILE *inputFile, *outputFile;
-    struct Student students[100];
-    int count = 0;
+    FILE *fileIn, *fileOut;
+    SinhVien sv[100];
+    int i = 0;
+    char buffer[100];
 
-
-    inputFile = fopen("sv_in.txt", "r");
-    if (inputFile == NULL) {
-        printf("Error opening file");
+    fileIn = fopen("sinhvien.txt", "r");
+    if (fileIn == NULL) {
+        perror("Error opening file");
         return 1;
     }
 
-    char line[100];
-    while (fgets(line, sizeof(line), inputFile)) {
-        sscanf(line, "%[^,],%[^,],%[^,],%f", students[count].name, students[count].class, students[count].dob,&students[count].gpa);
-        count++;
+    while (fgets(buffer, 100, fileIn)) {
+        sscanf(buffer, "%[^,],%[^,],%[^,],%f", sv[i].ten, sv[i].lop, sv[i].ngaySinh, &sv[i].gpa);
+        i++;
     }
+    fclose(fileIn);
 
-    qsort(students, count, sizeof(struct Student), compare);
+    int n = i;
 
-    outputFile = fopen("sv_out.txt", "w");
-    if (outputFile == NULL) {
-        printf("Error opening file");
+    qsort(sv, n, sizeof(SinhVien), compare);
+
+    fileOut = fopen("sinhvien_out.txt", "w");
+    if (fileOut == NULL) {
+        perror("Error opening file");
         return 1;
     }
 
-
-    for (int i = 0; i < count; i++) {
-        fprintf(outputFile, "%s,%s,%s,%.2f", students[i].name, students[i].class, students[i].dob, students[i].gpa);
+    for (i = 0; i < n; i++) {
+        fprintf(fileOut, "%s,%s,%s,%.2f", sv[i].ten, sv[i].lop, sv[i].ngaySinh, sv[i].gpa);
     }
-
-    fclose(inputFile);
-    fclose(outputFile);
+    fclose(fileOut);
 
     return 0;
 }
